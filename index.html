@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Drop URL → Vercel Blob</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto;display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#e6eef8}
+    .card{background:#111827;padding:24px;border-radius:12px;max-width:640px;width:100%}
+    input{width:100%;padding:10px;margin-bottom:8px;border-radius:6px;border:1px solid #334155;background:#0b1220;color:#e6eef8}
+    button{padding:10px 14px;border-radius:8px;border:none;cursor:pointer}
+    a.blob{display:block;margin-top:12px;color:#60a5fa;word-break:break-all}
+    small{color:#94a3b8}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Вставь URL → Получи blob ссылка</h2>
+    <small>Insert any public URL (image, file, etc.)</small>
+    <input id="url" placeholder="https://i.example.com/thing.png" />
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="go">Upload</button>
+      <button id="paste">Paste</button>
+    </div>
+    <div id="out"></div>
+  </div>
+
+<script>
+document.getElementById('paste').addEventListener('click', async () => {
+  const text = await navigator.clipboard.readText().catch(()=>'');
+  document.getElementById('url').value = text;
+});
+document.getElementById('go').addEventListener('click', async () => {
+  const u = document.getElementById('url').value.trim();
+  const out = document.getElementById('out');
+  out.innerHTML = 'Uploading…';
+  try {
+    const r = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ url: u })
+    });
+    const j = await r.json();
+    if (!r.ok) throw j;
+    out.innerHTML = `
+      <div>Готово! 📦</div>
+      <a class="blob" href="${j.blobUrl}" target="_blank">${j.blobUrl}</a>
+      <div style="margin-top:8px"><code>${j.bnlob}</code></div>
+    `;
+  } catch (e) {
+    out.innerHTML = '<div style="color:#fca5a5">Error: ' + (e.error || e.message || JSON.stringify(e)) + '</div>';
+  }
+});
+</script>
+</body>
+</html>
