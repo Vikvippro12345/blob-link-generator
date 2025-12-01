@@ -1,2 +1,8 @@
-npm init -y
-npm install @vercel/blob
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@vercel/blob": "latest"
+  }
+}
